@@ -1,0 +1,118 @@
+CREATE DEFINER=`root`@`localhost` PROCEDURE `SP_Alta_usuario`(
+IN p_id int, IN p_nombre varchar(20), IN p_apellido_paterno varchar(20), IN p_apellido_materno varchar(20), IN p_DOB date, 
+IN u_id int, IN u_usuario varchar(20), IN u_password varchar(20),
+IN d_id int, IN d_calle varchar(20), IN d_numero varchar(5), IN d_colonia varchar(20), IN d_ciudad varchar(20), IN d_municipio varchar(20), IN d_estado varchar(20), IN d_tipo_direccion enum('Billing','Personal','Trabajo'),
+IN t_id int, IN t_lada varchar(3), IN t_numero varchar(10), IN t_tipo_telefono enum('Celular','Local','Trabajo')
+)
+BEGIN
+
+insert into persona values(p_id, p_nombre, p_apellido_paterno, p_apellido_materno, p_DOB);
+insert into usuario values(u_id, u_usuario, u_password, p_id);
+insert into direccion values(d_id, d_calle, d_numero, d_colonia, d_ciudad, d_municipio, d_estado, d_tipo_direccion);
+insert into telefono values(t_id, t_lada, t_numero, t_tipo_telefono);
+insert into telefono_persona values(p_id, t_id);
+insert into direccion_persona values(p_id, d_id);
+
+END
+--------------------------------------------------------------------------------------------------------------------------
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `SP_actualizar_persona`(
+IN p_id int, IN p_nombre varchar(20), IN p_apellido_paterno varchar(20), IN p_apellido_materno varchar(20), IN p_DOB date
+)
+BEGIN
+
+DECLARE existe int;
+SELECT 
+    COUNT(id)
+INTO existe FROM
+    persona
+WHERE
+    id = p_id;
+IF existe THEN
+   UPDATE persona
+   SET id=p_id, nombre=p_nombre, apellido_paterno=p_apellido_paterno, apellido_materno=p_apellido_materno, DOB=p_DOB
+   WHERE id=p_id;
+SELECT 'Los datos se actualizaron correctamente' AS mensaje;
+ELSE
+   select 'El ID de persona NO existe' as mensaje;
+ END IF;
+ 
+END
+--------------------------------------------------------------------------------------------------------------------------
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `SP_actualizar_usuario`(
+IN u_id int, IN u_usuario varchar(20), IN u_password varchar(20)
+)
+BEGIN
+
+DECLARE existe int;
+SELECT 
+    COUNT(id)
+INTO existe FROM
+    usuario
+WHERE
+    id = u_id;
+if existe then
+   UPDATE usuario
+   SET id=u_id, usuario=u_usuario, password=u_password
+   WHERE id=u_id;
+SELECT 'Los datos se actualizaron correctamente' AS mensaje;
+else
+   select 'El ID de usuario NO existe' as mensaje;
+END IF;
+
+END
+--------------------------------------------------------------------------------------------------------------------------
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `SP_actualizar_datos_personales`(
+IN d_id int, IN d_calle varchar(20), IN d_numero varchar(5), IN d_colonia varchar(20), IN d_ciudad varchar(20), IN d_municipio varchar(20), IN d_estado varchar(20), IN d_tipo_direccion enum('Billing','Personal','Trabajo'),
+IN t_id int, IN t_lada varchar(3), IN t_numero varchar(10), IN t_tipo_telefono enum('Celular','Local','Trabajo')
+)
+BEGIN
+
+DECLARE existe,existe2 int;
+SELECT COUNT(id) INTO existe FROM direccion WHERE id=d_id;
+if existe then
+   UPDATE direccion
+   SET id=d_id, calle=d_calle, numero=d_numero, colonia=d_colonia, ciudad=d_ciudad, municipio=d_municipio, estado=d_estado, tipo_direccion=d_tipo_direccion
+   WHERE id=d_id;
+   SELECT 'Los datos de direccion se actualizaron correctamente' as mensaje;
+else
+   select 'El ID de direccion NO existe' as mensaje;
+END IF;
+
+SELECT COUNT(id) INTO existe2 FROM telefono WHERE id=t_id;
+if existe2 then
+   UPDATE telefono
+   SET id=t_id, lada=t_lada, numero=t_numero, tipo_telefono=t_tipo_telefono
+   WHERE id=t_id;
+   SELECT 'Los datos de telefono se actualizaron correctamente' as mensaje;
+else
+   select 'El ID de telefono NO existe' as mensaje;
+END IF;
+
+END
+--------------------------------------------------------------------------------------------------------------------------
+
+CREATE PROCEDURE SP_delete_user(
+IN u_id int
+)
+
+BEGIN
+
+DECLARE existe int;
+SELECT 
+    COUNT(id)
+INTO existe FROM
+    usuario
+WHERE
+    id = u_id;
+if existe then
+   DELETE FROM usuario
+   WHERE id=u_id;
+SELECT 'Los datos de de usuario han sido eliminados' AS mensaje;
+else
+   select 'El ID de usuario NO existe' as mensaje;
+END IF;
+
+END
